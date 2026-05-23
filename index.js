@@ -8,15 +8,12 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================
-// 1. เชื่อมต่อฐานข้อมูล TiDB
+// 1. เชื่อมต่อฐานข้อมูล TiDB (แก้ไขส่งค่า URL เข้าไปตรงๆ)
 // ==========================================
-const pool = mysql.createPool({
-    uri: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: true }
-});
+const pool = mysql.createPool(process.env.DATABASE_URL);
 
 // ==========================================
-// 2. API หน้า Home (ที่มันหาไม่เจอ คือตรงนี้ครับ!)
+// 2. API สำหรับดึงข้อมูลหนังสือ
 // ==========================================
 app.get('/api/books', async (req, res) => {
     try {
@@ -29,7 +26,7 @@ app.get('/api/books', async (req, res) => {
 });
 
 // ==========================================
-// 3. API สำหรับ Login
+// 3. API สำหรับ Login (แก้ไขลิงก์รูปภาพให้โหลดง่ายขึ้น)
 // ==========================================
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
@@ -41,7 +38,8 @@ app.post('/api/login', (req, res) => {
                 fname: 'My', 
                 lname: 'Profile', 
                 username: 'admin', 
-                avatar: 'https://ui-avatars.com/api/?name=My+Profile&background=0D8ABC&color=fff' 
+                // เปลี่ยนเป็นลิงก์รูปภาพแบบธรรมดา เพื่อแก้ปัญหา Image data พังครับ
+                avatar: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' 
             }
         });
     } else {
