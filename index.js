@@ -1,22 +1,34 @@
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
-require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // ==========================================
-// 1. เชื่อมต่อฐานข้อมูล TiDB (แก้ไขส่งค่า URL เข้าไปตรงๆ)
+// 1. เชื่อมต่อฐานข้อมูล TiDB (แยกช่องชัดเจน ป้องกันการแกะ URL พัง)
 // ==========================================
-const pool = mysql.createPool(process.env.DATABASE_URL);
+const pool = mysql.createPool({
+    host: 'gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com',
+    port: 4000,
+    user: 'niX4XWs6aDeimVQ.root',
+    password: '22TJFhF9hqdwI45T',
+    database: 'rsu_db',
+    ssl: {
+        rejectUnauthorized: true // บังคับใช้ SSL สำหรับ TiDB Cloud
+    },
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
 // ==========================================
 // 2. API สำหรับดึงข้อมูลหนังสือ
 // ==========================================
 app.get('/api/books', async (req, res) => {
     try {
+        console.log('กำลังดึงข้อมูลจาก TiDB...');
         const [rows] = await pool.query('SELECT * FROM books');
         res.json(rows);
     } catch (error) {
@@ -26,7 +38,7 @@ app.get('/api/books', async (req, res) => {
 });
 
 // ==========================================
-// 3. API สำหรับ Login (แก้ไขลิงก์รูปภาพให้โหลดง่ายขึ้น)
+// 3. API สำหรับ Login
 // ==========================================
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
@@ -38,7 +50,6 @@ app.post('/api/login', (req, res) => {
                 fname: 'My', 
                 lname: 'Profile', 
                 username: 'admin', 
-                // เปลี่ยนเป็นลิงก์รูปภาพแบบธรรมดา เพื่อแก้ปัญหา Image data พังครับ
                 avatar: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' 
             }
         });
