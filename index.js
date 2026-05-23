@@ -13,7 +13,7 @@ app.use(express.json());
 const pool = mysql.createPool({
     uri: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: true // TiDB Cloud บังคับใช้ SSL
+        rejectUnauthorized: true
     }
 });
 
@@ -36,7 +36,6 @@ app.get('/api/books', async (req, res) => {
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
-    // ตรวจสอบ Username และ Password
     if (username === 'admin' && password === '1234') {
         res.json({
             status: 'ok',
