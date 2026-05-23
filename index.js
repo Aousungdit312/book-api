@@ -8,17 +8,15 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================
-// 1. ตั้งค่าการเชื่อมต่อฐานข้อมูล TiDB
+// 1. เชื่อมต่อฐานข้อมูล TiDB
 // ==========================================
 const pool = mysql.createPool({
     uri: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: true
-    }
+    ssl: { rejectUnauthorized: true }
 });
 
 // ==========================================
-// 2. API สำหรับดึงข้อมูลหนังสือ (หน้า Home)
+// 2. API หน้า Home (ที่มันหาไม่เจอ คือตรงนี้ครับ!)
 // ==========================================
 app.get('/api/books', async (req, res) => {
     try {
@@ -31,7 +29,7 @@ app.get('/api/books', async (req, res) => {
 });
 
 // ==========================================
-// 3. API สำหรับ Login (ที่เราเขียนเอง)
+// 3. API สำหรับ Login
 // ==========================================
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
@@ -47,13 +45,10 @@ app.post('/api/login', (req, res) => {
             }
         });
     } else {
-        res.status(401).json({ status: 'error', message: 'รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่' });
+        res.status(401).json({ status: 'error', message: 'รหัสผ่านผิด' });
     }
 });
 
-// ==========================================
-// 4. สั่งให้ Server เริ่มทำงาน
-// ==========================================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
