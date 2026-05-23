@@ -1,7 +1,42 @@
+const express = require('express');
+const cors = require('cors');
+const mysql = require('mysql2/promise');
+require('dotenv').config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// ==========================================
+// 1. ตั้งค่าการเชื่อมต่อฐานข้อมูล TiDB
+// ==========================================
+const pool = mysql.createPool({
+    uri: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: true // TiDB Cloud บังคับใช้ SSL
+    }
+});
+
+// ==========================================
+// 2. API สำหรับดึงข้อมูลหนังสือ (หน้า Home)
+// ==========================================
+app.get('/api/books', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM books');
+        res.json(rows);
+    } catch (error) {
+        console.error('Database Error:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// ==========================================
+// 3. API สำหรับ Login (ที่เราเขียนเอง)
+// ==========================================
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
-    // เรากำหนดให้ใช้ Username: admin และ Password: 1234
+    // ตรวจสอบ Username และ Password
     if (username === 'admin' && password === '1234') {
         res.json({
             status: 'ok',
@@ -9,11 +44,18 @@ app.post('/api/login', (req, res) => {
                 fname: 'My', 
                 lname: 'Profile', 
                 username: 'admin', 
-                // ใช้รูประบบสุ่ม Avatar สวยๆ
                 avatar: 'https://ui-avatars.com/api/?name=My+Profile&background=0D8ABC&color=fff' 
             }
         });
     } else {
         res.status(401).json({ status: 'error', message: 'รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่' });
     }
+});
+
+// ==========================================
+// 4. สั่งให้ Server เริ่มทำงาน
+// ==========================================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
